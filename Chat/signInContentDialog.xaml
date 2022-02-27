@@ -11,7 +11,14 @@
     CloseButtonText="Cancel"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
     CloseButtonClick="ContentDialog_CloseButtonClick">
-   
+    <ContentDialog.Resources>
+        <Flyout x:Key="SignUpFlyout">
+            <StackPanel>
+                <TextBlock Text="User is not found, do you want to register a user with such data?"/>
+                <Button Content="Register" Click="RegisterButton_Click"/>
+            </StackPanel>
+        </Flyout>
+    </ContentDialog.Resources>
     <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <TextBox Name="userNameTextBox" Header="User name" Margin="0, 15"/>
         <PasswordBox Name="passwordTextBox" Header="Password" IsPasswordRevealButtonEnabled="True"/>

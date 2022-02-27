@@ -26,27 +26,29 @@ namespace Chat
     {
         public string Result { get; private set; }
 
-        private bool SignInCheck()
+        private void SignInCheck()
         {
-            //using (SqlConnection connection = new SqlConnection(@"Data Source = BALABOLKIN-DESK\SQLEXPRESS; Initial Catalog = LOGIN; Integrated Security = True;"))
-            //{
-            //        connection.Open();
-            //        SqlCommand command = new SqlCommand("SELECT * from [LoginUser] WHERE (UserLogin = @login) AND (UserPassword = @pass)", connection);
-            //        SqlParameter logPr = new SqlParameter("@login", userNameTextBox.Text);
-            //        command.Parameters.Add(logPr);
-            //        SqlParameter PassPr = new SqlParameter("@pass", passwordTextBox.Password);
-            //        command.Parameters.Add(PassPr);
-            //        SqlDataReader sqlReader = command.ExecuteReader();
-            //        if (sqlReader.HasRows == true)
-            //        {
-            //            return true;
-            //        }
-            //        else
-            //        {
-            //            return false;
-            //        }
-            //}
-            return true;
+            using (SqlConnection connection = new SqlConnection(@"Data Source = BALABOLKIN-DESK\SQLEXPRESS; Initial Catalog = LOGIN; Integrated Security = True;"))
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand("SELECT UserLogin from [LoginUser] WHERE (UserLogin = @login) AND (UserPassword = @pass)", connection);
+                SqlParameter logPr = new SqlParameter("@login", userNameTextBox.Text);
+                command.Parameters.Add(logPr);
+                SqlParameter PassPr = new SqlParameter("@pass", passwordTextBox.Password);
+                command.Parameters.Add(PassPr);
+                SqlDataReader sqlReader = command.ExecuteReader();
+                sqlReader.Read();
+                if (sqlReader.HasRows == true)
+                {
+                    this.Result = sqlReader.GetString(0);
+                }
+                else
+                {
+                    FlyoutBase.SetAttachedFlyout(this, (FlyoutBase)this.Resources["SignUpFlyout"]);
+                    FlyoutBase.ShowAttachedFlyout(this);
+                    this.Result = "Guest";
+                }
+            }
         }
 
         public SignInContentDialog()
@@ -71,19 +73,17 @@ namespace Chat
             // deferral when the async operation is complete.
 
             ContentDialogButtonClickDeferral deferral = args.GetDeferral();
-            if (SignInCheck())
-            {
-                this.Result = "User";
-            }
-            else
-            {
-                this.Result = "Guest";
-            }
+            SignInCheck();
             deferral.Complete();
         }
         private void ContentDialog_CloseButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
             this.Result = "Guest";
+        }
+
+        private void RegisterButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

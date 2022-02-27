@@ -59,7 +59,7 @@ namespace Chat
                 this.Result = SignInResult.SignInCancel;
             }
         }
-        private async void syncButton_Click(object sender, RoutedEventArgs e)
+        private async void loginButton_Click(object sender, RoutedEventArgs e)
         {
 
             SignInContentDialog signInDialog = new SignInContentDialog();
@@ -68,27 +68,27 @@ namespace Chat
             usernameBlock.Text = signInDialog.Result;
         }
 
-        //private async void syncButton_Click(object sender, RoutedEventArgs e)
-        //{
-        //    try
-        //    {
-        //        using (StreamReader sr = new StreamReader(@"D:\YandexDisk\VKI\System programming\Lomakin\chat.txt"))
-        //        {
-        //            chatBox.Text = await sr.ReadToEndAsync();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ContentDialog errDialog = new ContentDialog()
-        //        {
-        //            Title = "Error",
-        //            Content = ex.ToString(),
-        //            PrimaryButtonText = "Ok",
-        //        };
-        //        errDialog.XamlRoot = this.Content.XamlRoot;
-        //        await errDialog.ShowAsync();
+        private async void syncButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                using (StreamReader sr = new StreamReader(@"D:\YandexDisk\VKI\System programming\Lomakin\chat.txt"))
+                {
+                    chatBox.Text = await sr.ReadToEndAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                ContentDialog errDialog = new ContentDialog()
+                {
+                    Title = "Error",
+                    Content = ex.ToString(),
+                    PrimaryButtonText = "Ok",
+                };
+                errDialog.XamlRoot = this.Content.XamlRoot;
+                await errDialog.ShowAsync();
 
-        //    }
-        //}
+            }
+        }
     }
 }
