@@ -1,4 +1,4 @@
-﻿using Microsoft.UI.Xaml;
+﻿    using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
@@ -26,9 +26,9 @@ namespace Chat
     {
         public string Result { get; private set; }
 
-        private void SignInCheck()
+        private async void SignInCheck()
         {
-            using (SqlConnection connection = new SqlConnection(@"Data Source = BALABOLKIN-DESK\SQLEXPRESS; Initial Catalog = LOGIN; Integrated Security = True;"))
+            await using (SqlConnection connection = new SqlConnection(@"Data Source = BALABOLKIN-LAPT\SQLEXPRESS; Initial Catalog = LOGIN; Integrated Security = True;"))
             {
                 connection.Open();
                 SqlCommand command = new SqlCommand("SELECT UserLogin from [LoginUser] WHERE (UserLogin = @login) AND (UserPassword = @pass)", connection);
@@ -41,12 +41,11 @@ namespace Chat
                 if (sqlReader.HasRows == true)
                 {
                     this.Result = sqlReader.GetString(0);
+                    this.Hide();
                 }
                 else
                 {
-                    FlyoutBase.SetAttachedFlyout(this, (FlyoutBase)this.Resources["SignUpFlyout"]);
-                    FlyoutBase.ShowAttachedFlyout(this);
-                    this.Result = "Guest";
+                    //loginButton.Flyout.ShowAt(loginButton);
                 }
             }
         }
@@ -55,35 +54,34 @@ namespace Chat
         {
             this.InitializeComponent();
         }
-        private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        private void LoginButtonClick(object sender, RoutedEventArgs e)
         {
-            // Ensure the user name and password fields aren't empty. If a required field
-            // is empty, set args.Cancel = true to keep the dialog open.
-            if (string.IsNullOrEmpty(userNameTextBox.Text))
-            {
-                args.Cancel = true;
-            }
-            else if (string.IsNullOrEmpty(passwordTextBox.Password))
-            {
-                args.Cancel = true;
-            }
-
-            // If you're performing async operations in the button click handler,
-            // get a deferral before you await the operation. Then, complete the
-            // deferral when the async operation is complete.
-
-            ContentDialogButtonClickDeferral deferral = args.GetDeferral();
             SignInCheck();
-            deferral.Complete();
         }
-        private void ContentDialog_CloseButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        private void GuestButtonClick(object sender, RoutedEventArgs e)
         {
             this.Result = "Guest";
+            this.Hide();
         }
 
         private void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
-
+            using (SqlConnection connection = new SqlConnection(@"Data Source = BALABOLKIN-LAPT\SQLEXPRESS; Initial Catalog = LOGIN; Integrated Security = True;"))
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand("INSERT INTO [LoginUser] (UserLogin, UserPassword) VALUES  (@login, @pass)", connection);
+                SqlParameter logPr = new SqlParameter("@login", userNameTextBox.Text);
+                command.Parameters.Add(logPr);
+                SqlParameter PassPr = new SqlParameter("@pass", passwordTextBox.Password);
+                command.Parameters.Add(PassPr);
+                command.ExecuteNonQuery();
+            }
+            this.Result = userNameTextBox.Text;
+            this.Hide();
+        }
+        private void CancelFlyoutButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Hide();
         }
     }
 }
