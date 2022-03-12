@@ -38,27 +38,6 @@ namespace Chat
             this.InitializeComponent();
             
         }
-        public enum SignInResult
-        {
-            SignInOK,
-            SignInFail,
-            SignInCancel,
-            Nothing
-        }
-        public sealed partial class signInDialog : ContentDialog
-        {
-            public SignInResult Result { get; set; }
-
-            private void ContentDialog_PrimaryButtonClick(object sender, RoutedEventArgs e)
-            {
-                this.Result = SignInResult.SignInOK;
-            }
-
-            private void ContentDialog_CloseButtonClick(object sender, RoutedEventArgs e)
-            {
-                this.Result = SignInResult.SignInCancel;
-            }
-        }
         private async void loginButton_Click(object sender, RoutedEventArgs e)
         {
 
@@ -66,6 +45,10 @@ namespace Chat
             signInDialog.XamlRoot = this.Content.XamlRoot;
             await signInDialog.ShowAsync();
             usernameBlock.Text = signInDialog.Result;
+            if (usernameBlock.Text == "Guest")
+                loginButton.Content = "Sign In";
+            else
+                loginButton.Content = "Log out";
         }
 
         private async void syncButton_Click(object sender, RoutedEventArgs e)

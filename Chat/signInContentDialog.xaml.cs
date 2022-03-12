@@ -1,4 +1,5 @@
-﻿    using Microsoft.UI.Xaml;
+﻿using Microsoft.UI;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
@@ -28,24 +29,34 @@ namespace Chat
 
         private async void SignInCheck()
         {
-            await using (SqlConnection connection = new SqlConnection(@"Data Source = BALABOLKIN-LAPT\SQLEXPRESS; Initial Catalog = LOGIN; Integrated Security = True;"))
+            
+            if (string.IsNullOrEmpty(userNameTextBox.Text))
             {
-                connection.Open();
-                SqlCommand command = new SqlCommand("SELECT UserLogin from [LoginUser] WHERE (UserLogin = @login) AND (UserPassword = @pass)", connection);
-                SqlParameter logPr = new SqlParameter("@login", userNameTextBox.Text);
-                command.Parameters.Add(logPr);
-                SqlParameter PassPr = new SqlParameter("@pass", passwordTextBox.Password);
-                command.Parameters.Add(PassPr);
-                SqlDataReader sqlReader = command.ExecuteReader();
-                sqlReader.Read();
-                if (sqlReader.HasRows == true)
+                userNameTextBox.BorderBrush = new SolidColorBrush(Colors.Red);
+                Flyout.ShowAttachedFlyout(userNameTextBox);
+            }
+            if (string.IsNullOrEmpty(passwordTextBox.Password))
+            {
+                passwordTextBox.BorderBrush = new SolidColorBrush(Colors.Red);
+                Flyout.ShowAttachedFlyout(passwordTextBox);
+            }
+            if ((!string.IsNullOrEmpty(userNameTextBox.Text))&&(!string.IsNullOrEmpty(passwordTextBox.Password)))
+            {
+                await using (SqlConnection connection = new SqlConnection(@"Data Source = BALABOLKIN-DESK\SQLEXPRESS; Initial Catalog = LOGIN; Integrated Security = True;"))
                 {
-                    this.Result = sqlReader.GetString(0);
-                    this.Hide();
-                }
-                else
-                {
-                    //loginButton.Flyout.ShowAt(loginButton);
+                    connection.Open();
+                    SqlCommand command = new SqlCommand("SELECT UserLogin, UserPassword from [LoginUser] WHERE (UserLogin = @login)", connection);
+                    SqlParameter logPr = new SqlParameter("@login", userNameTextBox.Text);
+                    command.Parameters.Add(logPr);
+                    SqlDataReader sqlReader = command.ExecuteReader();
+                    sqlReader.Read();
+                    if ((sqlReader.HasRows) && (sqlReader.GetString(1) == passwordTextBox.Password))
+                    {
+                        this.Result = sqlReader.GetString(0);
+                        this.Hide();
+                    }
+                    else
+                        Flyout.ShowAttachedFlyout(loginButton);
                 }
             }
         }
@@ -66,7 +77,7 @@ namespace Chat
 
         private void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection(@"Data Source = BALABOLKIN-LAPT\SQLEXPRESS; Initial Catalog = LOGIN; Integrated Security = True;"))
+            using (SqlConnection connection = new SqlConnection(@"Data Source = BALABOLKIN-DESK\SQLEXPRESS; Initial Catalog = LOGIN; Integrated Security = True;"))
             {
                 connection.Open();
                 SqlCommand command = new SqlCommand("INSERT INTO [LoginUser] (UserLogin, UserPassword) VALUES  (@login, @pass)", connection);
@@ -77,10 +88,6 @@ namespace Chat
                 command.ExecuteNonQuery();
             }
             this.Result = userNameTextBox.Text;
-            this.Hide();
-        }
-        private void CancelFlyoutButton_Click(object sender, RoutedEventArgs e)
-        {
             this.Hide();
         }
     }

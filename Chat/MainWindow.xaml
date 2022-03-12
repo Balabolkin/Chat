@@ -7,8 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}">
-        <TextBlock x:Name="usernameBlock"></TextBlock>
+    <Grid x:Name="mGrid" Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}">
+        <TextBlock x:Name="usernameBlock">Guest</TextBlock>
         <Button x:Name="loginButton" Click="loginButton_Click">Sign In</Button>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
             <TextBox x:Name="chatBox"></TextBox>
