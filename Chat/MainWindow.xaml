@@ -12,31 +12,51 @@
             <DataTemplate x:Key="MessageViewTemplate" x:DataType="local:Message">
                 <Grid Height="Auto" Margin="4" HorizontalAlignment="{x:Bind MsgAlignment}">
                     <StackPanel MinHeight="75" Width="350" Padding="10, 0, 0, 10" Background="Wheat" CornerRadius="{StaticResource ControlCornerRadius}">
-                        <TextBlock Text="{x:Bind MsgText}" Padding="0, 10, 0, 0" FontSize="20" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}"/>
-                        <TextBlock Text="{x:Bind MsgDateTime}" Padding="0, 0, 0, 10" FontSize="15" Foreground="{ThemeResource SystemControlForegroundAltMediumHighBrush}"/>
+                        <TextBlock Text="{x:Bind MsgUser}" Padding="0, 0, 10, 0" FontSize="15" Foreground="{ThemeResource SystemControlForegroundAltMediumHighBrush}"/>
+                        <TextBlock Text="{x:Bind MsgText}" Padding="0, 5, 0, 0" FontSize="20" Foreground="{ThemeResource SystemControlForegroundAltHighBrush}" TextWrapping="Wrap"/>
+                        <TextBlock Text="{x:Bind MsgDateTime}" Padding="0, 0, 5, 5" FontSize="15" Foreground="{ThemeResource SystemControlForegroundAltMediumHighBrush}" HorizontalTextAlignment="Right"/>
                     </StackPanel>
                 </Grid>
             </DataTemplate>
         </Grid.Resources>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <TextBlock x:Name="usernameBlock">Guest</TextBlock>
-            <Button x:Name="loginButton" Click="loginButton_Click">Sign In</Button>
-        </StackPanel>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <ListView x:Name="InvertedListView" Width="500" Height="500"
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="1100" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="700" />
+                <RowDefinition Height="100" />
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
+                <TextBlock x:Name="usernameBlock">Guest</TextBlock>
+                <Button x:Name="loginButton" Click="loginButton_Click">Sign In</Button>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Grid.Row="0">
+                <ListView x:Name="InvertedListView" Width="1100" Height="700" SelectionMode = "None"
                 ItemTemplate="{StaticResource MessageViewTemplate}">
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <ItemsStackPanel ItemsUpdatingScrollMode="KeepLastItemInView"
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsStackPanel ItemsUpdatingScrollMode="KeepLastItemInView"
                               VerticalAlignment="Bottom"/>
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    </Style>
-                </ListView.ItemContainerStyle>
-            </ListView>
-        </StackPanel>
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.ColumnSpan="2" Grid.Row="1">
+                <TextBox x:Name="messageBox" Width="1150"/>
+                <Button x:Name="sendButton" Click="sendButton_Click" Width="50">
+                    <Button.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="Enter"/>
+                    </Button.KeyboardAccelerators>
+                    <Image Source="D:\YandexDisk\VKI\System programming\Lomakin\seic.png"/>
+                </Button>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

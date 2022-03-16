@@ -17,6 +17,7 @@ using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using WinRT.Interop;
 using Windows.UI.Popups;
+using System.Threading;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -33,11 +34,15 @@ namespace Chat
     }
     public sealed partial class MainWindow : Window
     {
+        private string username = "Guest";
+        private int messNum = 0;
         public MainWindow()
         {
             this.InitializeComponent();
-            readMessages();
-            
+            DispatcherTimer timer = new DispatcherTimer();
+            timer.Tick += readMessages;
+            timer.Interval = new TimeSpan(0, 0, 1);
+            timer.Start();
         }
         private async void loginButton_Click(object sender, RoutedEventArgs e)
         {
@@ -50,58 +55,56 @@ namespace Chat
                 loginButton.Content = "Sign In";
             else
                 loginButton.Content = "Log out";
+            InvertedListView.Items.Clear();
+            messNum = 0;
+            username=usernameBlock.Text;
         }
-        public async void readMessages()
+
+        private async void sendButton_Click(object sender, RoutedEventArgs e)
+        {
+            using (StreamWriter writer = new StreamWriter(@"D:\YandexDisk\VKI\System programming\Lomakin\chat.txt", true))
+            {
+                await writer.WriteLineAsync(username+'/'+DateTime.Now.ToString()+'/'+messageBox.Text);
+                messageBox.Text = "";
+            }
+        }
+
+
+        private async void readMessages(object sender, object e)
         {
             using (StreamReader sr = new StreamReader(@"D:\YandexDisk\VKI\System programming\Lomakin\chat.txt"))
             {
                 string mess = await sr.ReadLineAsync();
+                for (int i=0; i<messNum; i++)
+                    mess = await sr.ReadLineAsync();
                 while (mess != null)
                 {
                     string user = mess.Substring(0, mess.IndexOf('/'));
-                    string dt = mess.Substring(user.Length+1, 16);
-                    mess = mess.Substring(user.Length+18);
-                    InvertedListView.Items.Add(new Message(mess, dt, HorizontalAlignment.Left));
+                    string dt = mess.Substring(user.Length + 1, 19);
+                    mess = mess.Substring(user.Length + 21);
+                    if (user == username)
+                        InvertedListView.Items.Add(new Message(user, mess, dt, HorizontalAlignment.Right));
+                    else
+                        InvertedListView.Items.Add(new Message(user, mess, dt, HorizontalAlignment.Left));
                     mess = await sr.ReadLineAsync();
+                    messNum++;
                 }
-
             }
         }
     }
 
     public class Message
     {
+        public string MsgUser { get; private set; }
         public string MsgText { get; private set; }
         public string MsgDateTime { get; private set; }
         public HorizontalAlignment MsgAlignment { get; set; }
-        public Message(string text, string dateTime, HorizontalAlignment align)
+        public Message(string user ,string text, string dateTime, HorizontalAlignment align)
         {
+            MsgUser = user;
             MsgText = text;
             MsgDateTime = dateTime;
             MsgAlignment = align;
         }
     }
-}   
-
-        //private async void syncButton_Click(object sender, RoutedEventArgs e)
-        //{
-        //    try
-        //    {
-        //        using (StreamReader sr = new StreamReader(@"D:\YandexDisk\VKI\System programming\Lomakin\chat.txt"))
-        //        {
-        //            chatBox.Text = await sr.ReadToEndAsync();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ContentDialog errDialog = new ContentDialog()
-        //        {
-        //            Title = "Error",
-        //            Content = ex.ToString(),
-        //            PrimaryButtonText = "Ok",
-        //        };
-        //        errDialog.XamlRoot = this.Content.XamlRoot;
-        //        await errDialog.ShowAsync();
-
-        //    }
-        //}
+}
