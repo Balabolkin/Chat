@@ -36,6 +36,7 @@ namespace Chat
         public MainWindow()
         {
             this.InitializeComponent();
+            readMessages();
             
         }
         private async void loginButton_Click(object sender, RoutedEventArgs e)
@@ -50,28 +51,57 @@ namespace Chat
             else
                 loginButton.Content = "Log out";
         }
-
-        private async void syncButton_Click(object sender, RoutedEventArgs e)
+        public async void readMessages()
         {
-            try
+            using (StreamReader sr = new StreamReader(@"D:\YandexDisk\VKI\System programming\Lomakin\chat.txt"))
             {
-                using (StreamReader sr = new StreamReader(@"D:\YandexDisk\VKI\System programming\Lomakin\chat.txt"))
+                string mess = await sr.ReadLineAsync();
+                while (mess != null)
                 {
-                    chatBox.Text = await sr.ReadToEndAsync();
+                    string user = mess.Substring(0, mess.IndexOf('/'));
+                    string dt = mess.Substring(user.Length+1, 16);
+                    mess = mess.Substring(user.Length+18);
+                    InvertedListView.Items.Add(new Message(mess, dt, HorizontalAlignment.Left));
+                    mess = await sr.ReadLineAsync();
                 }
-            }
-            catch (Exception ex)
-            {
-                ContentDialog errDialog = new ContentDialog()
-                {
-                    Title = "Error",
-                    Content = ex.ToString(),
-                    PrimaryButtonText = "Ok",
-                };
-                errDialog.XamlRoot = this.Content.XamlRoot;
-                await errDialog.ShowAsync();
 
             }
         }
     }
-}
+
+    public class Message
+    {
+        public string MsgText { get; private set; }
+        public string MsgDateTime { get; private set; }
+        public HorizontalAlignment MsgAlignment { get; set; }
+        public Message(string text, string dateTime, HorizontalAlignment align)
+        {
+            MsgText = text;
+            MsgDateTime = dateTime;
+            MsgAlignment = align;
+        }
+    }
+}   
+
+        //private async void syncButton_Click(object sender, RoutedEventArgs e)
+        //{
+        //    try
+        //    {
+        //        using (StreamReader sr = new StreamReader(@"D:\YandexDisk\VKI\System programming\Lomakin\chat.txt"))
+        //        {
+        //            chatBox.Text = await sr.ReadToEndAsync();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ContentDialog errDialog = new ContentDialog()
+        //        {
+        //            Title = "Error",
+        //            Content = ex.ToString(),
+        //            PrimaryButtonText = "Ok",
+        //        };
+        //        errDialog.XamlRoot = this.Content.XamlRoot;
+        //        await errDialog.ShowAsync();
+
+        //    }
+        //}
