@@ -25,6 +25,7 @@ namespace Chat
     /// </summary>
     public sealed partial class SignInContentDialog : ContentDialog
     {
+        string strConn = Classes.connection.strConn;
         public string Result { get; private set; }
 
         private async void SignInCheck()
@@ -42,7 +43,7 @@ namespace Chat
             }
             if ((!string.IsNullOrEmpty(userNameTextBox.Text))&&(!string.IsNullOrEmpty(passwordTextBox.Password)))
             {
-                await using (SqlConnection connection = new SqlConnection(@"Data Source = BALABOLKIN-DESK\SQLEXPRESS; Initial Catalog = LOGIN; Integrated Security = True;"))
+                await using (SqlConnection connection = new SqlConnection(strConn))
                 {
                     connection.Open();
                     SqlCommand command = new SqlCommand("SELECT UserLogin, UserPassword from [LoginUser] WHERE (UserLogin = @login)", connection);
@@ -53,6 +54,7 @@ namespace Chat
                     if ((sqlReader.HasRows) && (sqlReader.GetString(1) == passwordTextBox.Password))
                     {
                         this.Result = sqlReader.GetString(0);
+
                         this.Hide();
                     }
                     else
@@ -77,7 +79,7 @@ namespace Chat
 
         private void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
-            using (SqlConnection connection = new SqlConnection(@"Data Source = BALABOLKIN-DESK\SQLEXPRESS; Initial Catalog = LOGIN; Integrated Security = True;"))
+            using (SqlConnection connection = new SqlConnection(strConn))
             {
                 connection.Open();
                 SqlCommand command = new SqlCommand("INSERT INTO [LoginUser] (UserLogin, UserPassword) VALUES  (@login, @pass)", connection);

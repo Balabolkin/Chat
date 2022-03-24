@@ -47,8 +47,9 @@ namespace Chat
         {
             m_window = new MainWindow();
             m_window.Activate();
-            m_window.SetWindowSize(1200, 800);
+            m_window.SetWindowSize(600, 940);
             m_window.SetIsResizable(false);
+            m_window.Title = "Чат";
         }
 
         

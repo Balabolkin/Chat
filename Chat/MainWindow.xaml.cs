@@ -18,6 +18,9 @@ using Microsoft.UI.Windowing;
 using WinRT.Interop;
 using Windows.UI.Popups;
 using System.Threading;
+using Windows.UI;
+using System.Data.SqlClient;
+using System.Data;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -36,6 +39,7 @@ namespace Chat
     {
         private string username = "Guest";
         private int messNum = 0;
+        string strConn = Classes.connection.strConn;
         public MainWindow()
         {
             this.InitializeComponent();
@@ -62,32 +66,47 @@ namespace Chat
 
         private async void sendButton_Click(object sender, RoutedEventArgs e)
         {
-            using (StreamWriter writer = new StreamWriter(@"D:\YandexDisk\VKI\System programming\Lomakin\chat.txt", true))
+            await using (SqlConnection connection = new SqlConnection(strConn))
             {
-                await writer.WriteLineAsync(username+'/'+DateTime.Now.ToString()+'/'+messageBox.Text);
-                messageBox.Text = "";
+                connection.Open();
+                SqlCommand command = new SqlCommand("INSERT INTO Message VALUES (@send, @rec, @mess, @date)", connection);
+                SqlParameter logPr = new SqlParameter("@send", username);
+                command.Parameters.Add(logPr);
+                logPr = new SqlParameter("@rec", "Guest");
+                command.Parameters.Add(logPr);
+                logPr = new SqlParameter("@mess", messageBox.Text);
+                command.Parameters.Add(logPr);
+                logPr = new SqlParameter("@date", DateTime.Now);
+                command.Parameters.Add(logPr);
+                command.ExecuteNonQuery();
             }
+            messageBox.Text="";
         }
 
 
         private async void readMessages(object sender, object e)
         {
-            using (StreamReader sr = new StreamReader(@"D:\YandexDisk\VKI\System programming\Lomakin\chat.txt"))
+            await using (SqlConnection connection = new SqlConnection(strConn))
             {
-                string mess = await sr.ReadLineAsync();
-                for (int i=0; i<messNum; i++)
-                    mess = await sr.ReadLineAsync();
-                while (mess != null)
+                connection.Open();
+                SqlCommand command = new SqlCommand("SELECT SndUser, Message, MsgDataTime from Message", connection);
+                SqlDataAdapter adapter = new SqlDataAdapter(command);
+                DataTable table = new DataTable();
+                adapter.Fill(table);
+                while (messNum!=table.Rows.Count)
                 {
-                    string user = mess.Substring(0, mess.IndexOf('/'));
-                    string dt = mess.Substring(user.Length + 1, 19);
-                    mess = mess.Substring(user.Length + 21);
-                    if (user == username)
-                        InvertedListView.Items.Add(new Message(user, mess, dt, HorizontalAlignment.Right));
-                    else
-                        InvertedListView.Items.Add(new Message(user, mess, dt, HorizontalAlignment.Left));
-                    mess = await sr.ReadLineAsync();
+                    DataRow dataRow = table.Rows[messNum];
                     messNum++;
+                    if (dataRow[0].ToString() == username)
+                    {
+                        var col = new SolidColorBrush(Colors.Wheat);
+                        InvertedListView.Items.Add(new Message(dataRow[0].ToString(), dataRow[1].ToString(), dataRow[2].ToString(), HorizontalAlignment.Right, col));
+                    }
+                    else
+                    {
+                        var col = new SolidColorBrush(Color.FromArgb(255, 194, 175, 141));
+                        InvertedListView.Items.Add(new Message(dataRow[0].ToString(), dataRow[1].ToString(), dataRow[2].ToString(), HorizontalAlignment.Left, col));
+                    }
                 }
             }
         }
@@ -99,12 +118,14 @@ namespace Chat
         public string MsgText { get; private set; }
         public string MsgDateTime { get; private set; }
         public HorizontalAlignment MsgAlignment { get; set; }
-        public Message(string user ,string text, string dateTime, HorizontalAlignment align)
+        public SolidColorBrush MsgColor { get; private set; }
+        public Message(string user ,string text, string dateTime, HorizontalAlignment align, SolidColorBrush color)
         {
             MsgUser = user;
             MsgText = text;
             MsgDateTime = dateTime;
             MsgAlignment = align;
+            MsgColor = color;
         }
     }
 }
